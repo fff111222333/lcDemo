@@ -1,0 +1,268 @@
+1.数据库隔离级别，脏读，不可重复读，幻读
+
+数据库的隔离级别是读未提交，读已提交，可重复读，串行化。
+脏读就是一个事务能够读取到另一个事务未提交的数据。
+不可重复读是一个事务内多次读同一个数据。
+幻读是一个事务内多次查询返回的集合不一样
+
+读未提交: 在该级别的事务中修改即使没有被提交，对其他事务也是可见的。会出现脏读，不可重复度和幻读。
+
+读已提交: 一个事务不能读取另外一个事务未提交的数据。解决脏读的问题，还是会出现不可重复读和幻读。
+
+可重复读: 一个事务相同条件下前后两次获取的数据是一致的，解决了脏读，不可重复读；但还是会有幻读。也是Mysql的默认隔离级别。
+
+串行化: 解决了脏读，不可重复读和幻读，但是效率差，实际中不使用。
+
+2.创建索引，什么时候适合创建索引
+
+索引是一个排序的数据结构，能够协助快速查询，更新数据库表中的数据。
+数据结构的角度: B树索引, Hash索引，B+索引(Mysql常用的索引)
+物理存储角度: 聚集索引，非聚集索引
+逻辑角度: 普通索引， 唯一索引， 主键索引， 联合索引， 全文索引
+
+什么时候该用索引
+(1)主键自动建立唯一索引
+(2)频繁作为查询条件(where)的字段需要创建索引
+(3)经常需要根据范围搜索的列上创建索引
+(4)经常用在连接(join)的列上
+(5)经常排序(order by)的字段
+(6)查询中统计或者分组的字段
+
+哪些情况不用索引
+(1)查询中很少使用的列
+(2)频繁更新的字段不适合创建索引
+(3)经常增删改的表
+(4)表记录太少，不需要创建索引
+(5)很少数据值的列也不需要索引
+
+索引的优缺点
+优点
+   创建索引，在查询过程中，提高系统的性能
+   创建唯一性索引，可以保证表中的每一行数据的唯一性
+   使用分组和排序子句进行检索，减少分组和排序的时间
+缺点
+   创建和维护索引需要耗费时间，且时间随着数据量的增加而增大
+   索引需要占用物理空间，聚簇索引需要的空间更大
+   在对表中的数据进行增加删除和修改时需要耗费较多的时间,因为索引也要动态地维护
+
+3.线程池，创建线程的方法和区别
+为什么要使用线程池: 降低系统消耗; 提高响应速度; 提高线程可管理性
+
+线程创建的方法
+(1)继承Thread类
+(2)实现Runnable接口
+(3)通过Callable和Future
+(4)通过线程池
+Runnable 接⼝中的 run() ⽅法的返回值是 void，它做的事情只是纯粹地去执⾏ run() ⽅法中的代码⽽已;
+Callable 接⼝中的 call() ⽅法是有返回值的，是⼀个泛型，和 Future、FutureTask 配合可以⽤来获取异步执⾏的结果。
+
+线程池的参数
+corePoolSize是核心线程数；maximumPoolSize是最大线程数；keepAliveTime是线程空闲后，保持存活的时间；unit是存活时间单位；
+workQueue是阻塞队列；threadFactory是创建线程的工厂；handler是拒绝策略。
+
+常使用的workQueue
+ArrayBlockingQueue: 基于数组的有限阻塞队列
+LinkedBlockingQueue: 基于链表的阻塞队列
+SynchronizedQueue: 一个不存储元素的阻塞队列
+PriorityBlockingQueue: 基于优先级的阻塞队列
+
+常使用的handler
+AbortPolicy: 直接抛出异常
+CallerRunsPolicy: 调用者所在的线程来执行任务
+DiscardOldestPolicy: 丢弃队列中最近的一个任务，并执行当前任务
+DiscardPolicy: 不处理，直接丢掉
+默认的策略时AbortPolicy，除此之外可以通过实现RejectedExecutionHandler接口自定义策略。
+
+线程池如何合理设置
+cpu密集型配置n+1个线程；io密集型配置2n个线程
+
+线程池的工作原理
+线程池中的线程数是否大于设置的核心线程数，如果不大于，那么创建一个核心线程池来执行任务；
+如果大于，判断阻塞队列是否满了，如果没有满则放入队列，等待线程空闲时执行；
+当阻塞队列满了，判断是否达到了线程池设置的最大线程数，如果没有达到，就创建新线程来执行任务；
+如果达到了设置的最大线程数，执行指定的拒绝策略。
+
+线程池的类型和场景
+CachedThreadPool适用于并发执行大量短期的小任务，线程池大小不固定，可灵活回收空闲线程
+FixedThreadPool适用于CPU密集型的任务
+ScheduledThreadPool适用于周期性执行任务的场景，是定时线程池
+SingleThreadPool适用于串行执行任务的场景，只创建一个线程
+
+4.Java中的设计模式 单例模式怎么保证线程安全
+见code里面的SingleTonDemo方法
+
+5.重载重写，子方法重写父方法，返回值可以不同吗，父方法没有抛出异常，子方法可以抛吗
+子类重写父类方法，返回值类型一定是相同的，子类可以抛出任何非强制异常，但是不能抛出新的强制性异常。
+
+重载
+   被重载的方法必须改变参数列表(参数个数或类型不一样)
+   被重载的方法可以改变返回类型
+   被重载的方法可以改变访问修饰符
+   被重载的方法可以声明新的或更广的检查异常
+   方法能够在同一个类中或者在一个子类中被重载
+   无法以返回值类型作为重载函数的区分标准
+重写
+   参数列表必须完全与被重写方法的相同
+   返回类型必须完全与被重写方法的返回类型相同
+   访问权限不能比父类中被重写的方法的访问权限更低。例如：如果父类的一个方法被声明为public，那么在子类中重写该方法就不能声明为protected
+   父类的成员方法只能被它的子类重写
+   声明为final的方法不能被重写
+   声明为static的方法不能被重写，但是能够被再次声明
+   子类和父类在同一个包中，那么子类可以重写父类所有方法，除了声明为private和final的方法
+   子类和父类不在同一个包中，那么子类只能够重写父类的声明为public和protected的非final方法。
+   重写的方法能够抛出任何非强制异常，无论被重写的方法是否抛出异常。但是，重写的方法不能抛出新的强制性异常，或者比被重写方法声明的更广泛的强制性异常，反之则可以
+   构造方法不能被重写
+   如果不能继承一个方法，则不能重写这个方法
+
+6.JDBC连接过程
+(1)加载JDBC驱动程序
+通过java.lang.Class类的静态方法forName(String className)实现,成功加载后，会将Driver类的实例注册到DriverManager类中
+
+(2)创建数据库的连接
+要连接数据库，需要向java.sql.DriverManager请求并获得Connection对象，该对象就代表一个数据库的连接。
+使用DriverManager的getConnection(String url , String username , String password )方法传入指定的欲连接的数据库的路径、数据库的用户名和密码来获得。
+
+(3)创建一个preparedStatement
+执行静态SQL语句。通常通过Statement实例实现。 Statement stmt = con.createStatement()
+执行动态SQL语句。通常通过PreparedStatement实例实现。 PreparedStatement pstmt = con.prepareStatement(sql) ;
+执行数据库存储过程。通常通过CallableStatement实例实现。 CallableStatement cstmt = con.prepareCall("{CALL demoSp(? , ?)}") ;
+
+(4)执行SQL语句
+Statement接口提供了三种执行SQL语句的方法：executeQuery 、executeUpdate和execute
+
+(5)遍历结果集
+
+(6)处理异常，关闭JDBC对象资源
+先关闭requestSet; 再关闭preparedStatement; 最后关闭连接对象connection
+
+7.如何优化分页查询
+两个角度：设计层面; SQl层面
+
+设计层面
+   产品设计时，界面上不要显示总数，只显示页码。先获取并缓存较多的数据（例如1000条），然后每次分页都从缓存中获取。
+
+SQL层面
+   (1)尽可能使用索引覆盖扫描，而不是查询所有的列，然后根据需要做一次关联操作再返回所需的列（延迟关联）
+   (2)将limit查询转换为已知位置的查询，让mysql通过范围扫描获得对应的结果（范围扫描）
+   具体实践
+   1、不要使用简单的分页查询方式直接到数据库查询，如：SELECT * FROM order LIMIT 100000, 10
+   2、如果主键ID连续递增（没有数据记录被物理删除的情况下可以保证），根据主键ID按范围查询优化
+      SELECT * FROM order WHERE id > 100000 AND id <= 100010 ORDER BY id;
+      SELECT * FROM order WHERE id > 100000 LIMIT 10 ORDER BY id;
+      SELECT * FROM order WHERE id >= (SELECT id FROM order ORDER BY id limit 100000,1) limit 0,10;
+   3、如果主键ID不连续，可以使用如下优化方式
+      子查询优化: SELECT * FROM order WHERE id IN (SELECT id FROM order ORDER BY id LIMIT 100000, 10) ORDER BY id;
+      延迟关联优化: SELECT * FROM order INNER JOIN (SELECT id FROM order LIMIT 100000,10) AS lim USING(id);
+
+8.对反射的理解，对可变参数的理解，对泛型的理解
+
+一、 对反射的理解
+反射是在程序运行状态中，可以构造任意一个类的对象，了解任意一个对象所属的类，任意一个类的成员变量和方法，调用任意一个对象的方法和属性。
+
+反射的使用
+   (1)JDBC连接，使用反射加载数据库驱动程序
+   (2)Web服务器中利用反射调用Sevelet服务方法
+   (3)Spring框架中的依赖注入和控制反转
+
+Java反射机制类
+java.lang.Class; //类
+java.lang.reflect.Constructor;//构造⽅法
+java.lang.reflect.Field; //类的成员变量
+java.lang.reflect.Method;//类的⽅法
+java.lang.reflect.Modifier;//访问权限
+
+利用反射创建对象
+(1)class对象获取
+         Person person = new Person();
+         Class<?> class1 = person.getClass();
+         //第二种方式 通过类的class属性
+         class1 = Person.class;
+         try {
+             //第三种方式 通过Class类的静态方法——forName()来实现
+             class1 = Class.forName("com.whoislcj.reflectdemo.Person");
+         } catch (ClassNotFoundException e) {
+             e.printStackTrace();
+         }
+(2)生成对象
+         (2.1) //第一种方式 Class对象调用newInstance()方法生成
+               Object obj = class1.newInstance();
+         (2.2) //第二种方式 对象获得对应的Constructor对象，再通过该Constructor对象的newInstance()方法生成
+               Constructor<?> constructor = class1.getDeclaredConstructor(new Class[]{String.class});//获取指定声明构造函数
+               obj = constructor.newInstance(new Object[]{"lcj"});
+
+二、 对可变参数的理解
+   (1)使用...表示可变长参数，比如 private void print(String... args){};
+   (2)在具有可变长参数的方法中可以把参数当成数组使用，例如可以循环输出所有的参数值
+       private void print(String... args) {
+               for (String string : args) {
+                   System.out.println("可变参数：" + string);
+               }
+           }
+   可变参数使用规则
+       优先匹配固定参数的方法
+       如果要调用的方法可以和两个可变参数匹配，则出现错误
+       一个方法只能有一个可变长参数，并且这个可变长参数必须是该方法的最后一个参数
+
+三、 对泛型的理解
+(1)泛型的本质是为了参数化类型，把类型明确的工作推迟到创建对象或调用方法的时候才去明确的特殊的类型。
+(2)泛型的好处
+   代码更加简洁【不用强制转换】
+   程序更加健壮【只要编译时期没有警告，那么运行时期就不会出现ClassCastException异常】
+   可读性和稳定性【在编写集合的时候，就限定了类型】
+比如增强for循环
+(3.1)泛型类
+          /*
+              1:把泛型定义在类上
+              2:类型变量定义在类上,方法中也可以使用
+           */
+          public class ObjectTool<T> {
+              private T obj;
+
+              public T getObj() {
+                  return obj;
+              }
+
+              public void setObj(T obj) {
+                  this.obj = obj;
+              }
+          }
+
+(3.2)泛型接口
+           /*
+               把泛型定义在接口上
+            */
+           public interface Inter<T> {
+               public abstract void show(T t);
+
+           }
+
+(3.3)泛型方法
+            //定义泛型方法..
+            public <T> void show(T t) {
+                System.out.println(t);
+
+            }
+
+(3.4)泛型擦除
+泛型是提供给javac编译器使用的，它用于限定集合的输入类型，让编译器在源代码级别上，即挡住向集合中插入非法数据。
+但编译器编译完带有泛形的java程序后，生成的class文件中将不再带有泛形信息，以此使程序运行效率不受到影响，这个过程称之为“擦除”。
+
+(3.5)静态方法泛型
+            /**
+             * 如果在类中定义使用泛型的静态方法，需要添加额外的泛型声明（将这个方法定义成泛型方法）
+
+             * 即使静态方法要使用泛型类中已经声明过的泛型也不可以。
+
+             * 如：public static void show(T t){..},此时编译器会提示错误信息：
+
+                  "StaticGenerator cannot be refrenced from static context"
+
+             */
+
+            //静态方法
+            public static <T> void show(T t){
+
+            }
+
+
+
