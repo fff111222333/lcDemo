@@ -1,0 +1,14 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/vcs.xml
+/modules.xml
+/misc.xml
+/lcDemo.iml
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+
+
