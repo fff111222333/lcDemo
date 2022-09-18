@@ -1,10 +1,10 @@
-package com.fjc.demo.test01;
+package com.fjc.demo.sort;
 
 /**
  * author 凡
  * @author Administrator
  */
-public class Demo01 {
+public class BubbleAndSelectSort {
 
     public static void main(String[] args) {
         int[] nums1 = {11,23,6,15,28,24};

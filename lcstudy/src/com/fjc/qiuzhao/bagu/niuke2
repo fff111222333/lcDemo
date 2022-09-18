@@ -1,0 +1,19 @@
+1. 事务如何开启？加在哪一层。
+SpringBoot是默认开启事务的，在service层的类或者方法上添加@Transactional注解
+设置事务隔离级别：
+@Transactional(isolation = Isolation.READ_UNCOMMITTED)：读未提交
+@Transactional(isolation = Isolation.READ_COMMITTED)：读已提交
+@Transactional(isolation = Isolation.REPEATABLE_READ)：可重复读
+@Transactional(isolation = Isolation.SERIALIZABLE)：串行化
+
+设置回滚：
+@Transactional(rollbackFor=Exception.class)，如果类加了这个注解，那么这个类里面的方法抛出异常，就会回滚，数据库里面的数据也会回滚
+
+Spring有两种方式开启事务: 声明式和编程式
+声明式是使用Spring框架提供的方式，声明式也有两种: xml配置文件方式; 注解方式
+编程式事务管理就是自己写代码逻辑, 用try catch 来实现出故障时回滚的操作
+
+2. TCP如何保证可靠性，TCP三次握手。
+
+
+
