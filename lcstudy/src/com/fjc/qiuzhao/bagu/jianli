@@ -88,6 +88,72 @@ UDP场景：QQ语音，QQ视频，直播；TCP场景：文件传输，发送和�
 9. HTTP常见的状态码
 
 
+10. synchronized, reentrantlock, volatile, lock的区别
+Synchronized和ReentrantLock的区别:
+都是可重入锁（得到当前对象的锁后可以在锁中再次进入带有锁的方法），都保证了可见性和互斥性，都可以用于控制多线程对共享对象的访问。
+不同的是:
+Synchronized是JVM级别的锁，而ReentrantLock是Lock接口下的类，是API层面的锁
+Synchronized不需要用户去手动释放锁，而ReentrantLock需要用户手动释放锁，如果没有释放可能会导致死锁（多个线程在运行时因争夺资源而导致的僵局）
+Synchronized是不可中断锁，除非加锁的代码出现异常或者正常执行完成，ReentrantLock是可中断锁(通过trylock设置超时方法)
+Synchronized为非公平锁，ReentrantLock默认是非公平锁，可以在构造时传入boolean值来选择，false是非公平锁
+Synchronized锁的是对象，ReentrantLock锁的是线程
+
+Synchronized和volatile区别:
+首先意识到是互补的存在，volatile只能使用在变量上，synchronized可以使用在类，变量，方法和代码块上
+volatile只保证可见性，synchronized保证原子性与可见性
+volatile禁止指令重排序，synchronized不会
+volatile不会造成线程的阻塞，synchronized可能会造成线程阻塞
+
+Synchronized和lock的区别:
+Synchronized是一个关键字，lock是一个接口
+synchronized发生异常时会自动释放占有的锁，不会出现死锁，lock发生异常时不会主动释放锁，需要使用unlock释放锁，可能引起死锁的发生
+Synchronized不能响应中断，lock可以用interrupt来中断等待
+lock可以使用trylock来知道有没有获取锁，synchronized不能
+synchronized适合少量同步场景，lock适合大量同步场景
+
+11. Redis如何保证缓存和数据库的一致性
+
+
+12. Redis的持久化方式
+RDB: 按照⼀定的时间周期策略把内存的数据以快照的形式保存到硬盘的⼆进制⽂件
+AOF: Redis会将每⼀个收到的写命令都通过 Write 函数追加到⽂件最后
+两者的区别:
+ AOF ⽂件⽐ RDB 更新频率⾼，优先使⽤ AOF 还原数据；
+ AOF⽐ RDB 更安全也更⼤；
+ RDB 性能⽐ AOF 好；
+ 如果两个都配了优先加载 AOF
+
+13. 事务失效的几种情况，什么是异常被吞掉，分布式数据库如何保证数据一致性
+
+事务是维护数据库的完整性，他保证成批的Mysql操作要么完全执行，要么完全不执行
+事务失效的情况:
+数据库引擎不支持事务，MyISAM不支持事务，InnoDB支持事务
+没有被Spring管理，也就是去掉@Service
+@Transactional 只能用于public 的方法上，否则事务会失效，如果要用在非 public 方法上，可以开启 AspectJ 代理模式
+自身调用问题
+异常被吃掉，或者异常类型错误
+
+异常被吞掉是什么: 运行时的代码发生的异常被catch捕捉住，并且不对事务做显式提交
+
+14. 缓存穿透是什么，怎么解决。缓存雪崩是什么，怎么解决。
+缓存穿透: 是指查询一个一定不存在的数据，缓存时不命中时需要到数据库查询，查不到数据则不写入缓存，导致这个不存在的数据每次请求都到数据库查询
+  有两种解决办法:
+     缓存空对象: 查询返回的数据为空，仍然把这个空结果进行缓存，但是过期时间很短，最长不超过5分钟
+        存在问题: 空值做缓存，意味着缓存中存了更多的键，需要更多内存空间
+                 缓存和存储的数据可能有一段时间窗口的不一致，可能会对业务有一定影响，
+    布隆过滤器: 将所有存在的数据哈希到一个足够大的bitmap中，一个一定不存在的数据会被这个bitmap拦截掉
+
+缓存雪崩: 缓存集中在一段时间内消失，发生大量的缓存穿透，所有的查询都落到了数据库上，造成了缓存雪崩
+   解决办法:
+      加锁排队: 缓存失效后，加锁或者队列控制读数据库写缓存的线程数量
+      数据预热:
+      双缓存策略:
+      缓存时给过期时间加上一个随机值，大幅度减少缓存在同一时期过期
+
+15.
+
+
+
 
 
 
