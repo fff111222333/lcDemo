@@ -1,0 +1,5 @@
+在使用腾讯云的云服务器时，安装了nginx，并且配置了安全组，但是还是无法直接访问到，可能是防火墙拒绝访问。
+解决办法，以80端口为例
+firewall-cmd --permanent --zone=public --add-port=80/tcp  ##添加防火墙允许的80端口
+firewall-cmd --reload  ##重启防火墙设置
+ firewall-cmd --list-ports  ## 查看防火墙允许的端口列表

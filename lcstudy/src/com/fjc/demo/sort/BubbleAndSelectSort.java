@@ -35,9 +35,10 @@ public class BubbleAndSelectSort {
     }
     public static void swap(int[] nums, int i, int j){
         if (i != j){
-            nums[i] ^= nums[j];
-            nums[j] ^= nums[i];
-            nums[i] ^= nums[j];
+            int temp;
+            temp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = temp;
         }
     }
 
