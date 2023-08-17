@@ -1,0 +1,64 @@
+单标查询 证书是否预期 代码如下：
+1.前端接受的是Boolean类型，然后根据值判断
+CertificateController中加入的代码
+    @GetMapping("/exist")
+    @Operation(summary = "证书是否延期")
+    @PreAuthorize("@ss.hasPermission('busine:certificate:query')")
+    public Boolean getCertificateOutOfTime(Integer id){
+        return certificateService.isCertificateTimeOutOf(id);
+    }
+
+CertificateService中添加的代码
+    /**
+     * 判断证书是否逾期
+     *
+     * @param id 查询条件
+     * @return boolean
+     */
+    Boolean isCertificateTimeOutOf(Integer id);
+
+CertificateService的实现类CertificateServiceImpl中的重写方法
+    @Override
+    public Boolean isCertificateTimeOutOf(Integer id) {
+        CertificateDO certificateDO = certificateMapper.selectById(id);
+        LocalDateTime endTime = certificateDO.getEndTime();
+        return endTime.isBefore(LocalDateTime.now());
+    }
+2.查询表中所有的值，再通过时间比较失效的证书，前端接受的是所有失效证书数组
+CertificateController中加入的代码
+    @GetMapping("/exist")
+    @Operation(summary = "证书是否延期")
+    @PreAuthorize("@ss.hasPermission('busine:certificate:query')")
+    public List<CertificateDO> getCertificateOutOfTime(){
+        return certificateService.isCertificateTimeOutOf();
+    }
+certificateService中加入的代码
+    /**
+     * 判断证书是否逾期
+     *
+     * @param 整表查询
+     * @return boolean
+     */
+    List<CertificateDO> isCertificateTimeOutOf();
+certificateServiceImpl中代码重写
+@Override
+    public List<CertificateDO> isCertificateTimeOutOf() {
+        List<CertificateDO> certificateDos = certificateMapper.selectList();
+        List<CertificateDO> list = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(certificateDos)) {
+            certificateDos.forEach(certificateDO ->
+            {
+                if (certificateDO.getDeleted() && certificateDO.getEndTime().isAfter(LocalDateTime.now())) {
+                    list.add(certificateDO);
+                }
+            });
+        }
+        return list;
+    }
+3.上述的两种方法感觉还是比较复杂，其实最好在sql查询的时候就只将失效的那些证书查询出来
+数据库中查询比在当前日期之前的失效日期
+select * from business_certificate where deleted = 0 and end_time < now() order by end_time DESC;
+后端中的代码就会简单很多，传给前端的是certificateDO的数组，前端根据需求取出对应需要的部分即可
+
+
+
