@@ -4,6 +4,7 @@ firewall-cmd --permanent --zone=public --add-port=80/tcp  ##添加防火墙允�
 firewall-cmd --reload  ##重启防火墙设置
 firewall-cmd --list-ports  ## 查看防火墙允许的端口列表
 
+
 docker的一些命令
 进入容器: docker exec -it ID /bin/bash或者sh
 压缩文件: docker save -o xx.tar ID
