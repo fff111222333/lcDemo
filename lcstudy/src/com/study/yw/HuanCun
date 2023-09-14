@@ -1,0 +1,49 @@
+
+* 缓存，就是数据交换的缓冲区，目的是
+ > 把读写速度【慢】的介质的数据保存在读写速度【快】的介质中，从而提高读写速度，减少时间消耗
+
+* 缓存算法
+ > LRU 最近最少使用
+>
+ > LFU 最不经常使用
+>
+ > FIFO 先进先出
+>
+**手写LRU**
+```java
+class LRUCache<K, V> extends LinkedHashMap<K, V> {
+    private final int CACHE_SIZE;
+
+    /**
+     * 传递进来最多能缓存多少数据
+     *
+     * @param cacheSize 缓存大小
+     */
+    public LRUCache(int cacheSize) {
+        // true 表示让 LinkedHashMap 按照访问顺序来进行排序，最近访问的放在头部，最老访问的放在尾部。
+        super((int) Math.ceil(cacheSize / 0.75) + 1, 0.75f, true);
+        CACHE_SIZE = cacheSize;
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        // 当 map 中的数据量大于指定的缓存个数的时候，就自动删除最老的数据。
+        return size() > CACHE_SIZE;
+    }
+
+}
+```
+* 缓存穿透  
+&emsp;指查询一个一定不存在的数据，由于缓存是不命中时被动写，并且处于容错考虑，因此从DB中查不到数据则不写入缓存，这将导致这个
+不存在的数据每次请求都会到DB去查询
+> 被动写： 当从缓存中查不到数据，然后从数据库查询到该数据，写入该数据到缓存中  
+  
+&emsp;&emsp;&emsp;解决缓存穿透的办法有两个:  
+> 1. 缓存空对象。当从 DB 查询数据为空，我们仍然将这个空结果进行缓存，具体的值需要使用特殊的标识，能和真正缓存的数据区分开。另外，需要设置较短的过期时间，一般建议不要超过 5 分钟。
+> 2. BloomFilter 布隆过滤器。在缓存服务的基础上，构建 BloomFilter 数据结构，在 BloomFilter 中存储对应的 KEY 是否存在，如果存在，说明该 KEY 对应的值不为空。  
+
+* 缓存击穿  
+&emsp;
+
+* 缓存雪崩
+
